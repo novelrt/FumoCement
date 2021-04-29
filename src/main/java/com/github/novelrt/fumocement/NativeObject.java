@@ -4,6 +4,32 @@ package com.github.novelrt.fumocement;
 
 import java.lang.ref.Cleaner;
 
+/**
+ * Represents an object managed natively using a handle (a native pointer).
+ *
+ * <p>
+ * <b>Example:</b>
+ * <pre>{@code public class Example extends NativeObject {
+ *   public Example() {
+ *     super(createStruct(), true, Example::destroyStruct);
+ *   }
+ *
+ *   protected Example(long handle, boolean isOwned) {
+ *     super(handle, isOwned, Example::destroyStruct);
+ *   }
+ *
+ *   private static native long createStruct();
+ *
+ *   private static native void destroyStruct(long handle);
+ *
+ *   public static Pointer<Example> createPointer() {
+ *     return new Pointer<>(Example::new);
+ *   }
+ *
+ *   public native void someMethod(int param);
+ * }
+ * }</pre>
+ */
 public abstract class NativeObject {
   private static final Cleaner NATIVE_OBJECTS_CLEANER = Cleaner.create();
 
