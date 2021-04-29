@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../../../:\Users\jeuxj\Downloads\fumo-cement\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+
+# I don't know what this is but this shouldn't be there
+libraries-with-intellij-classes.xml
+# We use gradle
+jarRepositories.xml
