@@ -41,7 +41,8 @@ public final class NativeObjectTracker<T extends NativeObject> {
   }
 
   /**
-   * Gets a native object that owns the given handle. If it is not
+   * Gets a native object that owns the given handle if this tracker is targeting
+   * owned objects ({@link Target#OWNED_OBJECTS}). If it is not
    * present, the tracker will create it for use later.
    *
    * @param handle the native handle
