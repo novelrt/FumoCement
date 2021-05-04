@@ -71,7 +71,10 @@ public final class NativeObjectTracker<T extends NativeObject> {
    */
   public void register(T instance) {
     if (instance.getResourceOwningState() != target.owningState) {
-      throw new IllegalArgumentException("Cannot register this instance as does not own its resource.");
+      throw new IllegalArgumentException(
+              target == Target.OWNED_OBJECTS ?
+              "Cannot register this instance as does not own its resource in an owned object-targeted tracker." :
+              "Cannot register this instance as it owns its resource in an unowned object-target tracker.");
     }
 
     // We still have to check the reference's value as there might be a chance where
