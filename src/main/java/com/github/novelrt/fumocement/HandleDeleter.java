@@ -2,7 +2,14 @@
 
 package com.github.novelrt.fumocement;
 
+/**
+ * Cleans native resources using a given handle.
+ */
 @FunctionalInterface
 public interface HandleDeleter {
-  void deleteHandle(long handle);
+  /**
+   * Cleans any native resources associated to a native handle.
+   * @param handle the native handle
+   */
+  void deleteHandle(@Pointer long handle);
 }

@@ -4,6 +4,14 @@ plugins {
   id 'java-library'
 }
 
+java {
+  modularity.inferModulePath = true
+}
+
+javadoc {
+  options.encoding("utf8")
+}
+
 group 'com.github.novelrt'
 version '1.0-SNAPSHOT'
 
