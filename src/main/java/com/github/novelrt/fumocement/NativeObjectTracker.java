@@ -19,7 +19,7 @@ import java.util.WeakHashMap;
  * Objects contained in this tracker are stored inside {@link WeakReference}s, thus
  * letting them getting garbage collected.
  *
- * @param <T> the type of {@link NativeObject} this registry contains
+ * @param <T> the type of {@link NativeObject} this tracker contains
  */
 public final class NativeObjectTracker<T extends NativeObject> {
   private final ReferenceQueue<? super T> referenceQueue = new ReferenceQueue<>();
@@ -42,7 +42,7 @@ public final class NativeObjectTracker<T extends NativeObject> {
 
   /**
    * Gets a native object that owns the given handle. If it is not
-   * present, the registry will create it for use later.
+   * present, the tracker will create it for use later.
    *
    * @param handle the native handle
    * @return a native object of type {@code T} that owns the given handle
@@ -65,7 +65,7 @@ public final class NativeObjectTracker<T extends NativeObject> {
    * @param instance the instance to register
    * @throws IllegalArgumentException when the resource doesn't own its resource according to
    *                                  {@linkplain #getTarget() this tracker's target}
-   * @throws IllegalArgumentException when another instance is present in this registry with
+   * @throws IllegalArgumentException when another instance is present in this tracker with
    *                                  the same handle
    */
   public void register(T instance) {
