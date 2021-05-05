@@ -2,27 +2,25 @@
 
 package com.github.novelrt.fumocement;
 
-import org.jetbrains.annotations.Nullable;
+import java.lang.annotation.*;
 
-public class Pointer<T extends NativeObject> extends NativeObject {
-  private final NativeObjectFactory<T> factory;
-
-  public Pointer(NativeObjectFactory<T> factory) {
-    super(createPointer(), true, Pointer::destroyPointer);
-    this.factory = factory;
-  }
-
-  private static native long getUnderlyingHandle(long handle);
-
-  private static native long createPointer();
-
-  private static native void destroyPointer(long handle);
-
-  public @Nullable T get() {
-    long underlyingHandle = getUnderlyingHandle(getHandle());
-    if (underlyingHandle == 0) {
-      return null;
-    }
-    return factory.createInstance(underlyingHandle, false);
-  }
+/**
+ * Indicates that the following type — most likely a {@code long} — represents
+ * a pointer in the native land.
+ * <p>
+ * Generics arguments (such as {@code T}, {@code U}, etc.) are allowed when this
+ * attribute is used inside a generic member.
+ */
+@Retention(RetentionPolicy.CLASS) // CLASS to make sure decompilers see this too!
+@Target({ElementType.TYPE_USE, ElementType.LOCAL_VARIABLE})
+@Documented
+public @interface Pointer {
+  /**
+   * Returns what this type represents in the native land, in C syntax.
+   * <p>
+   * <b>Examples:</b> {@code SomeStruct*}, {@code Transform**}
+   *
+   * @return the C-style representation of the type in the native land
+   */
+  String value() default "void*";
 }
