@@ -2,6 +2,7 @@
 
 package com.github.novelrt.fumocement;
 
+import java.lang.annotation.Target;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -50,7 +51,7 @@ public final class NativeObjectTracker<T extends NativeObject> {
    */
   public T getOrCreate(@Pointer("T*") long handle) {
     WeakReference<? extends T> reference = map.get(handle);
-    T actualValue = reference.get();
+    T actualValue = reference == null ? null : reference.get();
 
     if (actualValue == null) {
       actualValue = factory.createInstance(handle, target.owned);
