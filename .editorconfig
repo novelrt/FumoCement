@@ -5,11 +5,9 @@ charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 indent_style = space
-indent_size = 2
+indent_size = 4
 trim_trailing_whitespace = true
-file_header_template = Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root for more information.
-
-# IntelliJ stuff
+file_header_template = Copyright © Matt Jones and Contributors.Licensed under the MIT License (MIT). See LICENCE.md in the repository root for more information.
 ij_continuation_indent_size = 8
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on

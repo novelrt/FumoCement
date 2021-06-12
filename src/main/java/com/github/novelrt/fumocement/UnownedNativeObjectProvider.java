@@ -10,12 +10,12 @@ package com.github.novelrt.fumocement;
  * @see NativeObject.ResourceOwningState#UNOWNED
  */
 public interface UnownedNativeObjectProvider<T extends NativeObject> {
-  /**
-   * Provides a {@link NativeObject} of type {@code T} with the given handle, without
-   * owning it.
-   *
-   * @param handle the handle to use
-   * @return an instance of {@code T} using the given handle
-   */
-  T provide(@Pointer("T*") long handle);
+    /**
+     * Provides a {@link NativeObject} of type {@code T} with the given handle, without
+     * owning it.
+     *
+     * @param handle the handle to use
+     * @return an instance of {@code T} using the given handle
+     */
+    T provide(@Pointer("T*") long handle);
 }

@@ -17,25 +17,40 @@ package com.github.novelrt.fumocement;
  * C structs.
  */
 public abstract class NativeStruct extends NativeObject {
-  /**
-   * Constructs a new {@link NativeStruct} with the given handle, the native resource owning state, and
-   * a {@link HandleDeleter} deleting the native handle. It can be {@code null} if the
-   * {@code owned} parameter is {@code false}.
-   *
-   * @param handle        the native handle
-   * @param owned         whether or not this object owns native resources
-   * @param handleDeleter the {@link HandleDeleter} to use in order to delete native resources,
-   *                      which can be {@code null} when {@code owned} is false
-   */
-  public NativeStruct(@Pointer long handle, boolean owned, HandleDeleter handleDeleter) {
-    super(handle, owned, handleDeleter);
-  }
+    /**
+     * Constructs a new {@link NativeStruct} with the given handle, the native resource owning state, and
+     * a {@link HandleDeleter} deleting the native handle. It can be {@code null} if the
+     * {@code owned} parameter is {@code false}. This object's native resources will be garbage collected.
+     *
+     * @param handle        the native handle
+     * @param owned         whether or not this object owns native resources
+     * @param handleDeleter the {@link HandleDeleter} to use in order to delete native resources,
+     *                      which can be {@code null} when {@code owned} is false
+     */
+    public NativeStruct(@Pointer long handle, boolean owned, HandleDeleter handleDeleter) {
+        super(handle, owned, handleDeleter);
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public @Pointer long getHandle() {
-    return super.getHandle();
-  }
+    /**
+     * Constructs a new {@link NativeStruct} with the given handle, the native resource owning state,
+     * the {@link DisposalMethod} and a {@link HandleDeleter} deleting the native handle.
+     * It can be {@code null} if the {@code owned} parameter is {@code false}.
+     *
+     * @param handle        the native handle
+     * @param owned         whether or not this object owns native resources
+     * @param disposalMethod the disposal method to use
+     * @param handleDeleter the {@link HandleDeleter} to use in order to delete native resources,
+     *                      which can be {@code null} when {@code owned} is false
+     */
+    public NativeStruct(@Pointer long handle, boolean owned, DisposalMethod disposalMethod, HandleDeleter handleDeleter) {
+        super(handle, owned, disposalMethod, handleDeleter);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @Pointer long getHandle() {
+        return super.getHandle();
+    }
 }

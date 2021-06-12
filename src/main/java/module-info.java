@@ -4,7 +4,8 @@
  * The main FumoCement module.
  */
 module novelrt.fumocement {
-  requires static org.jetbrains.annotations;
+    requires static org.jetbrains.annotations;
 
-  exports com.github.novelrt.fumocement;
+    exports com.github.novelrt.fumocement;
+    exports com.github.novelrt.fumocement.builtin;
 }
