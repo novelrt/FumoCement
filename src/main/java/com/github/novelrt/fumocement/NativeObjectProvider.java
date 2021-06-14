@@ -3,16 +3,14 @@
 package com.github.novelrt.fumocement;
 
 /**
- * A provider for getting a {@link NativeObject} using an handle without owning it.
+ * A provider for getting a {@link NativeObject} using a handle.
  *
  * @param <T> the type of native object to provide
  * @see NativeObject
- * @see NativeObject.ResourceOwningState#UNOWNED
  */
-public interface UnownedNativeObjectProvider<T extends NativeObject> {
+public interface NativeObjectProvider<T extends NativeObject> {
     /**
-     * Provides a {@link NativeObject} of type {@code T} with the given handle, without
-     * owning it.
+     * Provides a {@link NativeObject} of type {@code T} with the given handle.
      *
      * @param handle the handle to use
      * @return an instance of {@code T} using the given handle

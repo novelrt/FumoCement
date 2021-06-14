@@ -12,32 +12,32 @@ import java.util.Objects;
  * as {@code T*}. For instance, putting a {@link Int32Pointer} will result in a
  * {@code int**} type.
  * <p>
- * This class uses a {@link UnownedNativeObjectProvider} to provide native objects
+ * This class uses a {@link NativeObjectProvider} to provide native objects
  * that consumes the underlying handle without owning it.
  *
  * @param <T> the native object type that this double pointer contains
  * @implNote Under the hood, this class allocates a {@code void**}.
  */
 public final class IndirectedPointer<T extends NativeObject> extends NativeObject {
-    private final UnownedNativeObjectProvider<T> provider;
+    private final NativeObjectProvider<T> provider;
 
     private @Pointer("T*") long lastUnderlyingHandle;
     private @Nullable T lastUnderlyingHandleAsObject;
 
     /**
-     * Creates a new instance of {@link IndirectedPointer} with the given {@link UnownedNativeObjectProvider}
+     * Creates a new instance of {@link IndirectedPointer} with the given {@link NativeObjectProvider}
      * which is used for giving native objects that serves as an access layer for the underlying
      * pointer. This object's native resources will be garbage collected.
      *
      * @param provider the native object provider to use
      * @throws NullPointerException when {@code provider} is null
      */
-    public IndirectedPointer(UnownedNativeObjectProvider<T> provider) {
+    public IndirectedPointer(NativeObjectProvider<T> provider) {
         this(provider, DisposalMethod.GARBAGE_COLLECTED);
     }
 
     /**
-     * Creates a new instance of {@link IndirectedPointer} with the given {@link UnownedNativeObjectProvider}
+     * Creates a new instance of {@link IndirectedPointer} with the given {@link NativeObjectProvider}
      * which is used for giving native objects that serves as an access layer for the underlying
      * pointer, and with the given {@link DisposalMethod}.
      *
@@ -45,7 +45,7 @@ public final class IndirectedPointer<T extends NativeObject> extends NativeObjec
      * @param disposalMethod the disposal method to use
      * @throws NullPointerException when {@code provider} is null
      */
-    public IndirectedPointer(UnownedNativeObjectProvider<T> provider, DisposalMethod disposalMethod) {
+    public IndirectedPointer(NativeObjectProvider<T> provider, DisposalMethod disposalMethod) {
         super(createPointer(), true, disposalMethod, IndirectedPointer::destroyPointer);
         this.provider = Objects.requireNonNull(provider);
     }
@@ -59,7 +59,7 @@ public final class IndirectedPointer<T extends NativeObject> extends NativeObjec
 
     private static native long getNativeUnderlyingHandle(long handle);
 
-    private static native long setNativeUnderlyingHandle(long handle, long value);
+    private static native void setNativeUnderlyingHandle(long handle, long value);
 
     private static native long createPointer();
 
