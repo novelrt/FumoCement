@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code float*} stored natively.
@@ -32,6 +33,11 @@ public final class FloatPointer extends NativeObject {
     private static native float getValue(long handle);
 
     private static native void setValue(long handle, float value);
+
+    @Override
+    public @Pointer("float*") long getHandle() {
+        return super.getHandle();
+    }
 
     public float getValue() {
         return getValue(getHandle());

@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code uint16_t*} stored natively.
@@ -32,6 +33,11 @@ public final class UInt16Pointer extends NativeObject {
     private static native char getUnsignedValue(long handle);
 
     private static native void setUnsignedValue(long handle, char value);
+
+    @Override
+    public @Pointer("uint16_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public char getUnsignedValue() {
         return getUnsignedValue(getHandle());

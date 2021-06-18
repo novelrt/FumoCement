@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code double*} stored natively.
@@ -32,6 +33,11 @@ public final class DoublePointer extends NativeObject {
     private static native double getValue(long handle);
 
     private static native void setValue(long handle, double value);
+
+    @Override
+    public @Pointer("double*") long getHandle() {
+        return super.getHandle();
+    }
 
     public double getValue() {
         return getValue(getHandle());

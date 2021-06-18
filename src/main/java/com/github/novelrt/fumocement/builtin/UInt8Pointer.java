@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 import com.github.novelrt.fumocement.Unsigned;
 
 /**
@@ -33,6 +34,11 @@ public final class UInt8Pointer extends NativeObject {
     private static native byte getUnsignedValue(long handle);
 
     private static native void setUnsignedValue(long handle, @Unsigned byte value);
+
+    @Override
+    public @Pointer("uint8_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public @Unsigned byte getUnsignedValue() {
         return getUnsignedValue(getHandle());

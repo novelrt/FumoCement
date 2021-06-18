@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 import com.github.novelrt.fumocement.Unsigned;
 
 /**
@@ -29,6 +30,11 @@ public final class UInt32Pointer extends NativeObject {
     private static native @Unsigned int getUnsignedValue(long handle);
 
     private static native void setUnsignedValue(long handle, @Unsigned int value);
+
+    @Override
+    public @Pointer("uint32_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public @Unsigned int getUnsignedValue() {
         return getUnsignedValue(getHandle());

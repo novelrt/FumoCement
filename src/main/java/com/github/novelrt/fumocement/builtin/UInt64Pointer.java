@@ -3,6 +3,7 @@
 package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 import com.github.novelrt.fumocement.Unsigned;
 
 /**
@@ -24,6 +25,11 @@ public final class UInt64Pointer extends NativeObject {
     private static native @Unsigned long getUnsignedValue(long handle);
 
     private static native void setUnsignedValue(long handle, @Unsigned long value);
+
+    @Override
+    public @Pointer("uint64_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public @Unsigned long getUnsignedValue() {
         return getUnsignedValue(getHandle());

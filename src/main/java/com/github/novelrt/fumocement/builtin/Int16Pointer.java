@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code int16_t*} stored natively.
@@ -32,6 +33,11 @@ public final class Int16Pointer extends NativeObject {
     private static native short getValue(long handle);
 
     private static native void setValue(long handle, short value);
+
+    @Override
+    public @Pointer("int16_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public short getValue() {
         return getValue(getHandle());

@@ -5,6 +5,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code int8_t*} stored natively.
@@ -33,6 +34,11 @@ public final class Int8Pointer extends NativeObject {
     private static native byte getValue(long handle);
 
     private static native void setValue(long handle, byte value);
+
+    @Override
+    public @Pointer("int8_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public byte getValue() {
         return getValue(getHandle());

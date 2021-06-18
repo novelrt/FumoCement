@@ -1,11 +1,12 @@
-// Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root for more information.
+// Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root
+// for more information.
 
 #ifndef FUMOCEMENT_LIB
 #define FUMOCEMENT_LIB
 
 #include "jni.h"
-#include <optional>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,62 +24,44 @@ namespace FumoCement
     // This enables compile-time caching as, for instance, multiple calls to
     // getCachedClass<SomeString>() will *always* use the same local static variable
     // containing the cached jclass. It's like generating a function for each different TemplateString.
-    template <const char... Chars>
-    struct TemplateString
+    template<const char... Chars> struct TemplateString
     {
-        static constexpr char Value[] = { Chars..., 0 };
+        static constexpr char Value[] = {Chars..., 0};
     };
 
-    template <
-        typename Class
-    >
-    jclass getCachedClass(JNIEnv* env) noexcept
+    template<typename Class> jclass getCachedClass(JNIEnv* env) noexcept
     {
         static jclass value = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(Class::Value)));
         return value;
     }
 
-    template <
-        typename Class,
-        typename FieldName,
-        typename Signature
-    >
-    jfieldID getCachedField(JNIEnv* env) noexcept
+    template<typename Class, typename FieldName, typename Signature> jfieldID getCachedField(JNIEnv* env) noexcept
     {
         static jfieldID value = [env]()
         {
-          const jclass containerClass = getCachedClass<Class>(env);
-          return env->GetFieldID(containerClass, FieldName::Value, Signature::Value);
+            const jclass containerClass = getCachedClass<Class>(env);
+            return env->GetFieldID(containerClass, FieldName::Value, Signature::Value);
         }();
         return value;
     }
 
-    template <
-        typename Class,
-        typename MethodName,
-        typename Signature
-    >
-    jmethodID getCachedMethod(JNIEnv* env) noexcept
+    template<typename Class, typename MethodName, typename Signature> jmethodID getCachedMethod(JNIEnv* env) noexcept
     {
         static jmethodID value = [env]()
         {
-          const jclass containerClass = getCachedClass<Class>(env);
-          return env->GetMethodID(containerClass, MethodName::Value, Signature::Value);
+            const jclass containerClass = getCachedClass<Class>(env);
+            return env->GetMethodID(containerClass, MethodName::Value, Signature::Value);
         }();
         return value;
     }
 
-    template <
-        typename Class,
-        typename MethodName,
-        typename Signature
-    >
+    template<typename Class, typename MethodName, typename Signature>
     jmethodID getCachedStaticMethod(JNIEnv* env) noexcept
     {
         static jmethodID value = [env]()
         {
-          const jclass containerClass = getCachedClass<Class>(env);
-          return env->GetStaticMethodID(containerClass, MethodName::Value, Signature::Value);
+            const jclass containerClass = getCachedClass<Class>(env);
+            return env->GetStaticMethodID(containerClass, MethodName::Value, Signature::Value);
         }();
         return value;
     }
@@ -105,7 +88,7 @@ namespace FumoCement
 
         env->ReleaseByteArrayElements(javaStringBytes, bytePointer, 0);
 
-        return { result }; // New std::optional
+        return {result}; // New std::optional
     }
 
     inline jbyteArray toJavaStringBytes(JNIEnv* env, const char* cString, bool deleteString) noexcept
@@ -137,8 +120,7 @@ namespace FumoCement
      * Type conversions
      */
 
-    template <typename N>
-    N toJavaPrimitive(N&& native) noexcept
+    template<typename N> N toJavaPrimitive(N&& native) noexcept
     {
         return native;
     }
@@ -148,8 +130,7 @@ namespace FumoCement
         return static_cast<jbyte>(native);
     }
 
-    template <typename J>
-    J toNativePrimitive(J&& java) noexcept
+    template<typename J> J toNativePrimitive(J&& java) noexcept
     {
         return java;
     }
@@ -163,26 +144,23 @@ namespace FumoCement
      * Pointer conversions
      */
 
-    template <typename T>
-    jlong toJavaPointer(const T* nativePointer) noexcept
+    template<typename T> jlong toJavaPointer(const T* nativePointer) noexcept
     {
         // TODO: Better cross-architecture.
         return reinterpret_cast<jlong>(nativePointer);
     }
 
-    template <typename T>
-    T* toNativePointer(jlong javaPointer) noexcept
+    template<typename T> T* toNativePointer(jlong javaPointer) noexcept
     {
         // TODO: Better cross-architecture.
-        return reinterpret_cast<T*>(static_cast<std::size_t>(javaPointer));
+        return reinterpret_cast<T*>(javaPointer);
     }
 
     /**
-    * C++ to C
-    */
+     * C++ to C
+     */
 
-    template <typename T>
-    T passAsC(const T& value) noexcept
+    template<typename T> T passAsC(const T& value) noexcept
     {
         return value;
     }
@@ -212,7 +190,7 @@ namespace FumoCement
         JavaVM* javaVm;
         jobject globalObjectRef;
 
-        [[ nodiscard ]] JNIEnv* getEnv() const
+        [[nodiscard]] JNIEnv* getEnv() const
         {
             JNIEnv* env = nullptr; // TODO: cache this?
             const auto result = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_2);
@@ -223,565 +201,712 @@ namespace FumoCement
             if (result == JNI_EDETACHED)
             {
                 // TODO: Detach... but when?
-                if (const auto attachResult = javaVm->AttachCurrentThreadAsDaemon(reinterpret_cast<void**>(&env), nullptr);
+                if (const auto attachResult =
+                        javaVm->AttachCurrentThreadAsDaemon(reinterpret_cast<void**>(&env), nullptr);
                     attachResult == JNI_OK)
                 {
                     return env;
                 }
 
                 throw std::runtime_error("JNI: Failed to attach to current thread.");
-
             }
             throw std::runtime_error("JNI: Failed to get an instance of JNIEnv");
         }
     };
-}
+} // namespace FumoCement
 
 extern "C"
 {
+#pragma region CharPointer
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_CharPointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_CharPointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new char);
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_CharPointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_CharPointer_destroyPointer(JNIEnv*,
+                                                                                                 jclass,
+                                                                                                 jlong handle)
+    {
+        delete FumoCement::toNativePointer<char>(handle);
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_CharPointer
+     * Method:    getValue
+     * Signature: (J)B
+     */
+    JNIEXPORT jbyte JNICALL Java_com_github_novelrt_fumocement_builtin_CharPointer_getValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle)
+    {
+        return static_cast<jbyte>(*FumoCement::toNativePointer<char>(handle));
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_CharPointer
+     * Method:    setValue
+     * Signature: (JB)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_CharPointer_setValue(JNIEnv*,
+                                                                                           jclass,
+                                                                                           jlong handle,
+                                                                                           jbyte value)
+    {
+        *FumoCement::toNativePointer<char>(handle) = static_cast<char>(value);
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_CharPointer
+     * Method:    readAsNullTerminatedString
+     * Signature: (JZ)[B
+     */
+    JNIEXPORT jbyteArray JNICALL
+    Java_com_github_novelrt_fumocement_builtin_CharPointer_readAsNullTerminatedString(JNIEnv* env,
+                                                                                      jclass,
+                                                                                      jlong handle,
+                                                                                      jboolean deleteString)
+    {
+        return FumoCement::toJavaStringBytes(env, reinterpret_cast<const char*>(handle), deleteString);
+    }
+
+#pragma endregion
+
 #pragma region DoublePointer
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_DoublePointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new double);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new double);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<double>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_destroyPointer(JNIEnv*,
+                                                                                                   jclass,
+                                                                                                   jlong handle)
+    {
+        delete FumoCement::toNativePointer<double>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
- * Method:    getValue
- * Signature: (J)D
- */
-JNIEXPORT jdouble JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return *FumoCement::toNativePointer<double>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
+     * Method:    getValue
+     * Signature: (J)D
+     */
+    JNIEXPORT jdouble JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_getValue(JNIEnv*,
+                                                                                                jclass,
+                                                                                                jlong handle)
+    {
+        return *FumoCement::toNativePointer<double>(handle);
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_DoublePointer
-* Method:    setValue
-* Signature: (JD)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_setValue
-    (JNIEnv*, jclass, jlong handle, jdouble value)
-{
-    *FumoCement::toNativePointer<double>(handle) = value;
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_DoublePointer
+     * Method:    setValue
+     * Signature: (JD)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_DoublePointer_setValue(JNIEnv*,
+                                                                                             jclass,
+                                                                                             jlong handle,
+                                                                                             jdouble value)
+    {
+        *FumoCement::toNativePointer<double>(handle) = value;
+    }
 
 #pragma endregion
 
 #pragma region FloatPointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_FloatPointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new float);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_FloatPointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new float);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_FloatPointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<float>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_FloatPointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_destroyPointer(JNIEnv*,
+                                                                                                  jclass,
+                                                                                                  jlong handle)
+    {
+        delete FumoCement::toNativePointer<float>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_FloatPointer
- * Method:    getValue
- * Signature: (J)F
- */
-JNIEXPORT jfloat JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return *FumoCement::toNativePointer<float>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_FloatPointer
+     * Method:    getValue
+     * Signature: (J)F
+     */
+    JNIEXPORT jfloat JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_getValue(JNIEnv*,
+                                                                                              jclass,
+                                                                                              jlong handle)
+    {
+        return *FumoCement::toNativePointer<float>(handle);
+    }
 
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_setValue
-    (JNIEnv*, jclass, jlong handle, jfloat value)
-{
-    *FumoCement::toNativePointer<float>(handle) = value;
-}
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_FloatPointer_setValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle,
+                                                                                            jfloat value)
+    {
+        *FumoCement::toNativePointer<float>(handle) = value;
+    }
 #pragma endregion
 
 #pragma region Int8Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::int8_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::int8_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::int8_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_destroyPointer(JNIEnv*,
+                                                                                                 jclass,
+                                                                                                 jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::int8_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
- * Method:    getValue
- * Signature: (J)B
- */
-JNIEXPORT jbyte JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jbyte>(*FumoCement::toNativePointer<std::int8_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
+     * Method:    getValue
+     * Signature: (J)B
+     */
+    JNIEXPORT jbyte JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_getValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle)
+    {
+        return static_cast<jbyte>(*FumoCement::toNativePointer<std::int8_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
-* Method:    setValue
-* Signature: (JB)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_setValue
-    (JNIEnv*, jclass, jlong handle, jbyte value)
-{
-    *FumoCement::toNativePointer<std::int8_t>(handle) = static_cast<std::int8_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int8Pointer
+     * Method:    setValue
+     * Signature: (JB)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int8Pointer_setValue(JNIEnv*,
+                                                                                           jclass,
+                                                                                           jlong handle,
+                                                                                           jbyte value)
+    {
+        *FumoCement::toNativePointer<std::int8_t>(handle) = static_cast<std::int8_t>(value);
+    }
 #pragma endregion
 
 #pragma region Int16Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::int16_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::int16_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::int16_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_destroyPointer(JNIEnv*,
+                                                                                                  jclass,
+                                                                                                  jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::int16_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
- * Method:    getValue
- * Signature: (J)S
- */
-JNIEXPORT jshort JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jshort>(*FumoCement::toNativePointer<std::int16_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
+     * Method:    getValue
+     * Signature: (J)S
+     */
+    JNIEXPORT jshort JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_getValue(JNIEnv*,
+                                                                                              jclass,
+                                                                                              jlong handle)
+    {
+        return static_cast<jshort>(*FumoCement::toNativePointer<std::int16_t>(handle));
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
- * Method:    setValue
- * Signature: (JS)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_setValue
-    (JNIEnv*, jclass, jlong handle, jshort value)
-{
-    *FumoCement::toNativePointer<std::int16_t>(handle) = static_cast<std::int16_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int16Pointer
+     * Method:    setValue
+     * Signature: (JS)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int16Pointer_setValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle,
+                                                                                            jshort value)
+    {
+        *FumoCement::toNativePointer<std::int16_t>(handle) = static_cast<std::int16_t>(value);
+    }
 #pragma endregion
 
 #pragma region Int32Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::int32_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::int32_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::int32_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_destroyPointer(JNIEnv*,
+                                                                                                  jclass,
+                                                                                                  jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::int32_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
- * Method:    getValue
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jint>(*FumoCement::toNativePointer<std::int32_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
+     * Method:    getValue
+     * Signature: (J)I
+     */
+    JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_getValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle)
+    {
+        return static_cast<jint>(*FumoCement::toNativePointer<std::int32_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
-* Method:    setValue
-* Signature: (JI)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_setValue
-    (JNIEnv*, jclass, jlong handle, jint value)
-{
-    *FumoCement::toNativePointer<std::int32_t>(handle) = static_cast<std::int32_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int32Pointer
+     * Method:    setValue
+     * Signature: (JI)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int32Pointer_setValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle,
+                                                                                            jint value)
+    {
+        *FumoCement::toNativePointer<std::int32_t>(handle) = static_cast<std::int32_t>(value);
+    }
 #pragma endregion
 
 #pragma region Int64Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::int64_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::int64_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::int64_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_destroyPointer(JNIEnv*,
+                                                                                                  jclass,
+                                                                                                  jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::int64_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
- * Method:    getValue
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_getValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jlong>(*FumoCement::toNativePointer<std::int64_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
+     * Method:    getValue
+     * Signature: (J)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_getValue(JNIEnv*,
+                                                                                             jclass,
+                                                                                             jlong handle)
+    {
+        return static_cast<jlong>(*FumoCement::toNativePointer<std::int64_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
-* Method:    setValue
-* Signature: (JJ)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_setValue
-    (JNIEnv*, jclass, jlong handle, jlong value)
-{
-    *FumoCement::toNativePointer<std::int64_t>(handle) = static_cast<std::int64_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_Int64Pointer
+     * Method:    setValue
+     * Signature: (JJ)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_Int64Pointer_setValue(JNIEnv*,
+                                                                                            jclass,
+                                                                                            jlong handle,
+                                                                                            jlong value)
+    {
+        *FumoCement::toNativePointer<std::int64_t>(handle) = static_cast<std::int64_t>(value);
+    }
 #pragma endregion
 
 #pragma region UInt8Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::uint8_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::uint8_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::uint8_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_destroyPointer(JNIEnv*,
+                                                                                                  jclass,
+                                                                                                  jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::uint8_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
- * Method:    getUnsignedValue
- * Signature: (J)B
- */
-JNIEXPORT jbyte JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_getUnsignedValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jbyte>(*FumoCement::toNativePointer<std::uint8_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
+     * Method:    getUnsignedValue
+     * Signature: (J)B
+     */
+    JNIEXPORT jbyte JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_getUnsignedValue(JNIEnv*,
+                                                                                                     jclass,
+                                                                                                     jlong handle)
+    {
+        return static_cast<jbyte>(*FumoCement::toNativePointer<std::uint8_t>(handle));
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
- * Method:    setUnsignedValue
- * Signature: (JB)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_setUnsignedValue
-    (JNIEnv*, jclass, jlong handle, jbyte value)
-{
-    *FumoCement::toNativePointer<std::uint8_t>(handle) = static_cast<std::uint8_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt8Pointer
+     * Method:    setUnsignedValue
+     * Signature: (JB)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt8Pointer_setUnsignedValue(JNIEnv*,
+                                                                                                    jclass,
+                                                                                                    jlong handle,
+                                                                                                    jbyte value)
+    {
+        *FumoCement::toNativePointer<std::uint8_t>(handle) = static_cast<std::uint8_t>(value);
+    }
 #pragma endregion
 
 #pragma region UInt16Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::uint16_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::uint16_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::uint16_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_destroyPointer(JNIEnv*,
+                                                                                                   jclass,
+                                                                                                   jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::uint16_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
- * Method:    getUnsignedValue
- * Signature: (J)C
- */
-JNIEXPORT jchar JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_getUnsignedValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jchar>(*FumoCement::toNativePointer<std::uint16_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
+     * Method:    getUnsignedValue
+     * Signature: (J)C
+     */
+    JNIEXPORT jchar JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_getUnsignedValue(JNIEnv*,
+                                                                                                      jclass,
+                                                                                                      jlong handle)
+    {
+        return static_cast<jchar>(*FumoCement::toNativePointer<std::uint16_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
-* Method:    setUnsignedValue
-* Signature: (JC)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_setUnsignedValue
-    (JNIEnv*, jclass, jlong handle, jchar value)
-{
-    *FumoCement::toNativePointer<std::uint16_t>(handle) = static_cast<std::uint16_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt16Pointer
+     * Method:    setUnsignedValue
+     * Signature: (JC)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt16Pointer_setUnsignedValue(JNIEnv*,
+                                                                                                     jclass,
+                                                                                                     jlong handle,
+                                                                                                     jchar value)
+    {
+        *FumoCement::toNativePointer<std::uint16_t>(handle) = static_cast<std::uint16_t>(value);
+    }
 #pragma endregion
 
 #pragma region UInt32Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::uint32_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::uint32_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::uint32_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_destroyPointer(JNIEnv*,
+                                                                                                   jclass,
+                                                                                                   jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::uint32_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
- * Method:    getUnsignedValue
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_getUnsignedValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jint>(*FumoCement::toNativePointer<std::uint32_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
+     * Method:    getUnsignedValue
+     * Signature: (J)I
+     */
+    JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_getUnsignedValue(JNIEnv*,
+                                                                                                     jclass,
+                                                                                                     jlong handle)
+    {
+        return static_cast<jint>(*FumoCement::toNativePointer<std::uint32_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
-* Method:    setUnsignedValue
-* Signature: (JI)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_setUnsignedValue
-    (JNIEnv*, jclass, jlong handle, jint value)
-{
-    *FumoCement::toNativePointer<std::uint32_t>(handle) = static_cast<std::uint32_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt32Pointer
+     * Method:    setUnsignedValue
+     * Signature: (JI)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt32Pointer_setUnsignedValue(JNIEnv*,
+                                                                                                     jclass,
+                                                                                                     jlong handle,
+                                                                                                     jint value)
+    {
+        *FumoCement::toNativePointer<std::uint32_t>(handle) = static_cast<std::uint32_t>(value);
+    }
 #pragma endregion
 
 #pragma region UInt64Pointer
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
-* Method:    allocatePointer
-* Signature: ()J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_allocatePointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new std::uint64_t);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::uint64_t);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<std::uint64_t>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_destroyPointer(JNIEnv*,
+                                                                                                   jclass,
+                                                                                                   jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::uint64_t>(handle);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
- * Method:    getUnsignedValue
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_getUnsignedValue
-    (JNIEnv*, jclass, jlong handle)
-{
-    return static_cast<jlong>(*FumoCement::toNativePointer<std::uint64_t>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
+     * Method:    getUnsignedValue
+     * Signature: (J)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_getUnsignedValue(JNIEnv*,
+                                                                                                      jclass,
+                                                                                                      jlong handle)
+    {
+        return static_cast<jlong>(*FumoCement::toNativePointer<std::uint64_t>(handle));
+    }
 
-/*
-* Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
-* Method:    setUnsignedValue
-* Signature: (JJ)V
-*/
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_setUnsignedValue
-    (JNIEnv*, jclass, jlong handle, jlong value)
-{
-    *FumoCement::toNativePointer<std::uint64_t>(handle) = static_cast<std::uint64_t>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UInt64Pointer
+     * Method:    setUnsignedValue
+     * Signature: (JJ)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UInt64Pointer_setUnsignedValue(JNIEnv*,
+                                                                                                     jclass,
+                                                                                                     jlong handle,
+                                                                                                     jlong value)
+    {
+        *FumoCement::toNativePointer<std::uint64_t>(handle) = static_cast<std::uint64_t>(value);
+    }
+#pragma endregion
+
+#pragma region UIntPtrPointer
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UIntPtrPointer
+     * Method:    allocatePointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UIntPtrPointer_allocatePointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new std::uintptr_t);
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UIntPtrPointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UIntPtrPointer_destroyPointer(JNIEnv*,
+                                                                                                    jclass,
+                                                                                                    jlong handle)
+    {
+        delete FumoCement::toNativePointer<std::uintptr_t>(handle);
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UIntPtrPointer
+     * Method:    getValue
+     * Signature: (J)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_builtin_UIntPtrPointer_getValue(JNIEnv*,
+                                                                                               jclass,
+                                                                                               jlong handle)
+    {
+        return static_cast<jlong>(*FumoCement::toNativePointer<std::uintptr_t>(handle));
+    }
+
+    /*
+     * Class:     com_github_novelrt_fumocement_builtin_UIntPtrPointer
+     * Method:    setValue
+     * Signature: (JJ)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_builtin_UIntPtrPointer_setValue(JNIEnv*,
+                                                                                              jclass,
+                                                                                              jlong handle,
+                                                                                              jlong value)
+    {
+        *FumoCement::toNativePointer<std::uintptr_t>(handle) = static_cast<std::uintptr_t>(value);
+    }
 #pragma endregion
 
 #pragma region IndirectedPointer
-/*
-* Class:     com_github_novelrt_fumocement_IndirectedPointer
-* Method:    getNativeUnderlyingHandle
-* Signature: (J)J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_getNativeUnderlyingHandle
-    (JNIEnv*, jclass, jlong handle)
-{
-    return FumoCement::toJavaPointer(*FumoCement::toNativePointer<void*>(handle));
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_IndirectedPointer
+     * Method:    getNativeUnderlyingHandle
+     * Signature: (J)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_getNativeUnderlyingHandle(JNIEnv*,
+                                                                                                           jclass,
+                                                                                                           jlong handle)
+    {
+        return FumoCement::toJavaPointer(*FumoCement::toNativePointer<void*>(handle));
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_IndirectedPointer
- * Method:    setNativeUnderlyingHandle
- * Signature: (JJ)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_setNativeUnderlyingHandle
-    (JNIEnv*, jclass, jlong handle, jlong value)
-{
-    *FumoCement::toNativePointer<void*>(handle) = FumoCement::toNativePointer<void>(value);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_IndirectedPointer
+     * Method:    setNativeUnderlyingHandle
+     * Signature: (JJ)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_setNativeUnderlyingHandle(JNIEnv*,
+                                                                                                          jclass,
+                                                                                                          jlong handle,
+                                                                                                          jlong value)
+    {
+        *FumoCement::toNativePointer<void*>(handle) = FumoCement::toNativePointer<void>(value);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_IndirectedPointer
- * Method:    createPointer
- * Signature: ()J
- */
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_createPointer
-    (JNIEnv*, jclass)
-{
-    return FumoCement::toJavaPointer(new void**);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_IndirectedPointer
+     * Method:    createPointer
+     * Signature: ()J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_createPointer(JNIEnv*, jclass)
+    {
+        return FumoCement::toJavaPointer(new void*);
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_IndirectedPointer
- * Method:    destroyPointer
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_destroyPointer
-    (JNIEnv*, jclass, jlong handle)
-{
-    delete FumoCement::toNativePointer<void*>(handle);
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_IndirectedPointer
+     * Method:    destroyPointer
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_IndirectedPointer_destroyPointer(JNIEnv*,
+                                                                                               jclass,
+                                                                                               jlong handle)
+    {
+        delete FumoCement::toNativePointer<void*>(handle);
+    }
 #pragma endregion
 
 #pragma region FunctionPointer
-/*
-* Class:     com_github_novelrt_fumocement_FunctionPointer
-* Method:    createPointerContext
-* Signature: (Ljava/lang/Object;)J
-*/
-JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_FunctionPointer_createPointerContext
-    (JNIEnv* env, jclass, jobject obj)
-{
-    return toJavaPointer(new FumoCement::FunctionPointerContext{ FumoCement::getJavaVM(env), env->NewGlobalRef(obj) });
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_FunctionPointer
+     * Method:    createPointerContext
+     * Signature: (Ljava/lang/Object;)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_github_novelrt_fumocement_FunctionPointer_createPointerContext(JNIEnv* env,
+                                                                                                    jclass,
+                                                                                                    jobject obj)
+    {
+        return toJavaPointer(
+            new FumoCement::FunctionPointerContext{FumoCement::getJavaVM(env), env->NewGlobalRef(obj)});
+    }
 
-/*
- * Class:     com_github_novelrt_fumocement_FunctionPointer
- * Method:    destroyPointerContext
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_FunctionPointer_destroyPointerContext
-    (JNIEnv* env, jclass, jlong handle)
-{
-    const auto* context = FumoCement::toNativePointer<FumoCement::FunctionPointerContext>(handle);
-    env->DeleteGlobalRef(context->globalObjectRef);
-    delete context;
-}
+    /*
+     * Class:     com_github_novelrt_fumocement_FunctionPointer
+     * Method:    destroyPointerContext
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_github_novelrt_fumocement_FunctionPointer_destroyPointerContext(JNIEnv* env,
+                                                                                                    jclass,
+                                                                                                    jlong handle)
+    {
+        const auto* context = FumoCement::toNativePointer<FumoCement::FunctionPointerContext>(handle);
+        env->DeleteGlobalRef(context->globalObjectRef);
+        delete context;
+    }
 #pragma endregion
 
-#pragma region PointerOperations
-/*
-* Class:     com_github_novelrt_fumocement_PointerOperations
-* Method:    getNativeLongSize
-* Signature: ()I
-*/
-JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_PointerOperations_getNativeLongSize
-    (JNIEnv*, jclass)
-{
-    static jint value = static_cast<jint>(sizeof(std::uintptr_t));
-    return value;
-}
+#pragma region Pointers
+    /*
+     * Class:     com_github_novelrt_fumocement_Pointers
+     * Method:    getNativeLongSize
+     * Signature: ()I
+     */
+    JNIEXPORT jint JNICALL Java_com_github_novelrt_fumocement_Pointers_getNativeLongSize(JNIEnv*, jclass)
+    {
+        static jint value = static_cast<jint>(sizeof(std::uintptr_t));
+        return value;
+    }
 #pragma endregion
 }
-
 
 #endif

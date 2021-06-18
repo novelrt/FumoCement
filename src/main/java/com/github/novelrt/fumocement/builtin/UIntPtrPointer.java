@@ -6,7 +6,7 @@ import com.github.novelrt.fumocement.NativeObject;
 import com.github.novelrt.fumocement.Pointer;
 
 /**
- * Represents a {@code std::uintptr_t*} stored natively.
+ * Represents a {@code uintptr_t*} stored natively.
  */
 public final class UIntPtrPointer extends NativeObject {
     public UIntPtrPointer() {
@@ -24,6 +24,11 @@ public final class UIntPtrPointer extends NativeObject {
     private static native @Pointer long getValue(long handle);
 
     private static native void setValue(long handle, @Pointer long value);
+
+    @Override
+    public @Pointer("uintptr_t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public @Pointer long getValue() {
         return getValue(getHandle());

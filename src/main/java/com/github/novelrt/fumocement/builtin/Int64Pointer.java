@@ -4,6 +4,7 @@ package com.github.novelrt.fumocement.builtin;
 
 import com.github.novelrt.fumocement.DisposalMethod;
 import com.github.novelrt.fumocement.NativeObject;
+import com.github.novelrt.fumocement.Pointer;
 
 /**
  * Represents a {@code int64_t*} stored natively.
@@ -32,6 +33,11 @@ public final class Int64Pointer extends NativeObject {
     private static native long getValue(long handle);
 
     private static native void setValue(long handle, long value);
+
+    @Override
+    public @Pointer("int_64t*") long getHandle() {
+        return super.getHandle();
+    }
 
     public long getValue() {
         return getValue(getHandle());
