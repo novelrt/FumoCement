@@ -2,6 +2,8 @@
 
 package com.github.novelrt.fumocement;
 
+import java.nio.ByteBuffer;
+
 /**
  * Contains tools to manipulate pointers, mainly used for going through an array.
  */
@@ -103,5 +105,23 @@ public final class Pointers {
      */
     public static @Pointer long advanceUintptrT(@Pointer long pointer) {
         return pointer + UINTPTR_T_SIZE;
+    }
+
+    private static native @Pointer long getByteBufferLocationRaw(ByteBuffer byteBuffer);
+
+    /**
+     * Gets the memory address of the given direct {@code ByteBuffer}.
+     *
+     * @param byteBuffer the byte buffer
+     * @return the memory address of the byte buffer
+     * @throws IllegalArgumentException when the byte buffer is not direct
+     */
+    public static @Pointer long getByteBufferLocation(ByteBuffer byteBuffer) {
+        if (!byteBuffer.isDirect()) {
+            throw new IllegalArgumentException(
+                    "The given byte buffer does not have any native pointer as is not direct.");
+        }
+
+        return getByteBufferLocationRaw(byteBuffer);
     }
 }
