@@ -15,12 +15,12 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE_USE, ElementType.LOCAL_VARIABLE})
 @Documented
 public @interface Pointer {
-  /**
-   * Returns what this type represents in the native land, in C syntax.
-   * <p>
-   * <b>Examples:</b> {@code SomeStruct*}, {@code Transform**}
-   *
-   * @return the C-style representation of the type in the native land
-   */
-  String value() default "void*";
+    /**
+     * Returns what this type represents in the native land, in C syntax.
+     * <p>
+     * <b>Examples:</b> {@code SomeStruct*}, {@code Transform**}
+     *
+     * @return the C-style representation of the type in the native land
+     */
+    String value() default "void*";
 }

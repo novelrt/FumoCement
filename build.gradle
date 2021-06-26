@@ -1,24 +1,29 @@
 // Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root for more information.
 
 plugins {
-  id 'java-library'
+    id 'java-library'
 }
 
 java {
-  modularity.inferModulePath = true
+    modularity.inferModulePath = true
+}
+
+compileJava {
+    // Generate some header files, useful for copy-pasting within FumoCement.h.
+    options.compilerArgs += ["-h", buildDir.toPath().resolve("headers").toAbsolutePath().toString()]
 }
 
 javadoc {
-  options.encoding("utf8")
+    options.encoding("utf8")
 }
 
 group 'com.github.novelrt'
 version '1.0-SNAPSHOT'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  compileOnly "org.jetbrains:annotations:20.1.0"
+    compileOnly "org.jetbrains:annotations:20.1.0"
 }
